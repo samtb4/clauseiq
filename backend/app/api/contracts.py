@@ -1,5 +1,6 @@
 from fastapi import APIRouter, UploadFile, File
 from pathlib import Path
+from app.services.pdf_service import extract_text_from_pdf
 
 router = APIRouter(prefix="/contracts", tags=["Contracts"])
 
@@ -15,7 +16,10 @@ async def upload_contract(file: UploadFile = File(...)):
         content = await file.read()
         buffer.write(content)
 
+    text = extract_text_from_pdf(str(file_path))
+
     return {
         "filename": file.filename,
-        "status": "uploaded"
+        "status": "uploaded",
+        "characters_extracted": len(text)
     }
