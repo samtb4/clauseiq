@@ -1,6 +1,7 @@
 from fastapi import APIRouter, UploadFile, File
 from pathlib import Path
 from app.services.pdf_service import extract_text_from_pdf
+from app.services.chunking_service import chunk_text
 
 router = APIRouter(prefix="/contracts", tags=["Contracts"])
 
@@ -17,9 +18,11 @@ async def upload_contract(file: UploadFile = File(...)):
         buffer.write(content)
 
     text = extract_text_from_pdf(str(file_path))
+    chunks = chunk_text(text)
 
     return {
         "filename": file.filename,
         "status": "uploaded",
-        "characters_extracted": len(text)
+        "characters_extracted": len(text),
+        "chunks_created": len(chunks)
     }
