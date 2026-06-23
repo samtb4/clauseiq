@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 # This is the search API endpoint. It takes a user query, retrieves relevant context from the Qdrant database, and returns the context along with the original query.
-from app.services.rag_service import retrieve_context
+from app.services.rag_service import answer_query
 
 router = APIRouter(
     prefix="/search",
@@ -17,11 +17,11 @@ class SearchRequest(BaseModel):
 @router.post("/")
 def search(request: SearchRequest):
 
-    context = retrieve_context(
+    answer = answer_query(
         request.query
     )
 
     return {
         "query": request.query,
-        "context": context
+        "answer": answer
     }

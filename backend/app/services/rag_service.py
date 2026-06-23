@@ -1,5 +1,6 @@
 from app.services.embedding_service import create_embedding
 from app.services.qdrant_service import search_chunks
+from app.services.llm_service import generate_answer
 
 # This function takes a user query, converts it into an embedding, searches the Qdrant database for relevant chunks, and returns the retrieved chunk text as a single context string.
 def retrieve_context(query: str) -> str:
@@ -19,3 +20,16 @@ def retrieve_context(query: str) -> str:
     )
 
     return context
+
+# This function takes a user query, retrieves relevant context from the Qdrant database, and generates an answer using the retrieved context.
+def answer_query(query: str):
+
+    context = retrieve_context(query)
+
+
+    answer = generate_answer(
+        query=query,
+        context=context
+    )
+
+    return answer
