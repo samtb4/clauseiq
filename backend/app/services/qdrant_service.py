@@ -42,14 +42,24 @@ def store_chunks(chunks, embeddings, filename):
     points = []
 
     for chunk, embedding in zip(chunks, embeddings):
+        if isinstance(chunk, dict):
+            chunk_text = chunk["text"]
+            page = chunk.get("page")
+            chunk_index = chunk.get("chunk_index")
+        else:
+            chunk_text = chunk
+            page = None
+            chunk_index = None
 
         points.append(
             PointStruct(
                 id=str(uuid.uuid4()),
                 vector=embedding,
                 payload={
-                    "text": chunk,
-                    "filename": filename
+                    "text": chunk_text,
+                    "filename": filename,
+                    "page": page,
+                    "chunk_index": chunk_index
                 }
             )
         )

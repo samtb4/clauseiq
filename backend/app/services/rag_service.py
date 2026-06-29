@@ -19,17 +19,29 @@ def retrieve_context(query: str) -> str:
         for result in results
     )
 
-    return context
+    return context, results
 
 # This function takes a user query, retrieves relevant context from the Qdrant database, and generates an answer using the retrieved context.
 def answer_query(query: str):
 
-    context = retrieve_context(query)
-
+    context, results = retrieve_context(query)
 
     answer = generate_answer(
         query=query,
         context=context
     )
 
-    return answer
+    sources = []
+
+    for result in results:
+        sources.append({
+            "filename": result.payload.get("filename"),
+            "page": result.payload.get("page"),
+            "chunk_index": result.payload.get("chunk_index"),
+            "excerpt": result.payload.get("text")[:200]
+        })
+
+    return {
+        "answer": answer,
+        "sources": sources
+    }

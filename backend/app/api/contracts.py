@@ -1,7 +1,9 @@
 from fastapi import APIRouter, UploadFile, File
 from pathlib import Path
-from app.services.pdf_service import extract_text_from_pdf
-from app.services.chunking_service import chunk_text
+from app.services.pdf_service import extract_pages_from_pdf
+from app.services.chunking_service import chunk_pages
+from app.services.embedding_service import create_embedding
+from app.services.qdrant_service import create_collection, store_chunks
 
 router = APIRouter(prefix="/contracts", tags=["Contracts"])
 
@@ -17,12 +19,22 @@ async def upload_contract(file: UploadFile = File(...)):
         content = await file.read()
         buffer.write(content)
 
-    text = extract_text_from_pdf(str(file_path))
-    chunks = chunk_text(text)
+    pages = extract_pages_from_pdf(str(file_path))
+    chunks = chunk_pages(pages)
+    
+
+    embeddings = [
+        create_embedding(chunk["text"])
+        for chunk in chunks
+    ]
+
+    create_collection()
+    store_chunks(chunks, embeddings, file.filename)
 
     return {
         "filename": file.filename,
         "status": "uploaded",
-        "characters_extracted": len(text),
-        "chunks_created": len(chunks)
+        "pages_extracted": len(pages),
+        "chunks_created": len(chunks),
+        "embeddings_created": len(embeddings)
     }
