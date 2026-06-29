@@ -8,6 +8,28 @@ client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY")
 )
 
+def chat_completion(prompt: str, json_output: bool = False):
+    """
+    Send a prompt to GPT-4o-mini.
+
+    If json_output=True, the model is instructed to return a valid JSON object.
+    """
+
+    request = {
+        "model": "gpt-4o-mini",
+        "messages": [
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+    }
+
+    if json_output:
+        request["response_format"] = {"type": "json_object"}
+
+    return client.chat.completions.create(**request)
+
 
 def generate_answer(query: str, context: str):
 
@@ -29,14 +51,6 @@ Question:
 """
 
     
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ]
-    )
+    response = chat_completion(prompt)
 
     return response.choices[0].message.content
